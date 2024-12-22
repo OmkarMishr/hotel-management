@@ -18,6 +18,7 @@ import RoomReview from "@/components/RoomReview/RoomReview";
 
 const RoomDetails = (props: {params: {slug: string}}) => {
   const {
+    //@ts-ignore
     params: {slug},
   } = props;
 

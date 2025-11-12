@@ -3,8 +3,10 @@ import { NextResponse } from 'next/server';
 
 export async function GET(
   req: Request,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
+  // Await params first
+  const params = await context.params;
   const roomId = params.id;
 
   try {
@@ -12,7 +14,7 @@ export async function GET(
 
     return NextResponse.json(roomReviews, {
       status: 200,
-      statusText: 'Succesful',
+      statusText: 'Successful',
     });
   } catch (error) {
     console.log('Getting Review Failed', error);

@@ -1,5 +1,6 @@
 'use client';
 
+import { use } from 'react';
 import useSWR from 'swr';
 import { FaSignOutAlt } from 'react-icons/fa';
 import Image from 'next/image';
@@ -19,10 +20,10 @@ import BackDrop from '@/components/BackDrop/BackDrop';
 import toast from 'react-hot-toast';
 import React from 'react';
 
-const UserDetails = (props: { params: { id: string } }) => {
-  const {
-    params: { id: userId },
-  } = props;
+const UserDetails = (props: { params: Promise<{ id: string }> }) => {
+  // Unwrap the params Promise using React.use()
+  const params = use(props.params);
+  const userId = params.id;
 
   const [currentNav, setCurrentNav] = useState<
     'bookings' | 'amount' | 'ratings'
@@ -36,14 +37,14 @@ const UserDetails = (props: { params: { id: string } }) => {
   const toggleRatingModal = () => setIsRatingVisible(prevState => !prevState);
 
   const reviewSubmitHandler = async () => {
-    console.log(ratingText,ratingValue);
+    console.log(ratingText, ratingValue);
     if (!ratingText.trim().length || !ratingValue) {
       return toast.error('Please provide a rating text and a rating');
     }
 
     if (!roomId) toast.error('Id not provided');
 
-    setIsSubmittingReview(true)
+    setIsSubmittingReview(true);
 
     try {
       const { data } = await axios.post('/api/users', {
@@ -91,7 +92,6 @@ const UserDetails = (props: { params: { id: string } }) => {
 
   if (loadingUserData) return <LoadingSpinner />;
   if (!userData) throw new Error('Cannot fetch data');
-  if (!userData) throw new Error('Cannot fetch data');
 
   return (
     <div className='container mx-auto px-2 md:px-4 py10'>
@@ -132,7 +132,7 @@ const UserDetails = (props: { params: { id: string } }) => {
               width={56}
               height={56}
               src={userData.image}
-              alt='User  Name'
+              alt='User Name'
             />
           </div>
           <p className='block w-fit md:hidden text-sm py-2'>

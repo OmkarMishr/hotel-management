@@ -1,5 +1,6 @@
 'use client';
 
+import { use } from 'react';
 import useSWR from "swr";
 import { getRoom } from '@/libs/apis';
 import LoadingSpinner from "../../loading";
@@ -16,10 +17,9 @@ import toast from 'react-hot-toast';
 import { getStripe } from '@/libs/stripe';
 import RoomReview from "@/components/RoomReview/RoomReview";
 
-const RoomDetails = (props: {params: {slug: string}}) => {
-  const {
-    params: {slug},
-  } = props;
+const RoomDetails = (props: { params: Promise<{ slug: string }> }) => {
+  const params = use(props.params);
+  const slug = params.slug;
 
   const [checkinDate, setCheckinDate] = useState<Date | null>(null);
   const [checkoutDate, setCheckoutDate] = useState<Date | null>(null);
@@ -28,13 +28,14 @@ const RoomDetails = (props: {params: {slug: string}}) => {
 
   const fetchroom = async () => getRoom(slug);
 
-  const { data: room, error, isLoading } = useSWR("/api/room",fetchroom);
+  const { data: room, error, isLoading } = useSWR("/api/room", fetchroom);
 
   if (error) throw new Error('Cannot fetch data');
   if (typeof room === 'undefined' && !isLoading)
     throw new Error('Cannot fetch data');
 
-  if (!room) return <LoadingSpinner/>;
+  if (!room) return <LoadingSpinner />;
+
   const calcMinCheckoutDate = () => {
     if (checkinDate) {
       const nextDay = new Date(checkinDate);
@@ -89,10 +90,9 @@ const RoomDetails = (props: {params: {slug: string}}) => {
     return noOfDays;
   };
 
-   
   return (
     <div>
-      <HotelPhotoGallery photos={room.images}/>
+      <HotelPhotoGallery photos={room.images} />
       <div className='container mx-auto mt-20'>
         <div className='md:grid md:grid-cols-12 gap-10 px-3'>
           <div className='md:col-span-8 md:w-full'>
@@ -187,7 +187,7 @@ const RoomDetails = (props: {params: {slug: string}}) => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
 export default RoomDetails;

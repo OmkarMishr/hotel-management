@@ -61,9 +61,26 @@ export async function POST(req: Request, res: Response) {
       });
     }
 
-    return NextResponse.json(data, {status: 200, statusText: 'Successful'});
+    // Remove circular references by converting to JSON and back
+    const cleanData = JSON.parse(JSON.stringify(data, getCircularReplacer()));
+
+    return NextResponse.json(cleanData, { status: 200, statusText: 'Successful' });
   } catch (error: any) {
     console.log('Error Updating', error);
     return new NextResponse('Unable to create review', { status: 400 });
   }
+}
+
+// Helper function to remove circular references
+function getCircularReplacer() {
+  const seen = new WeakSet();
+  return (key: string, value: any) => {
+    if (typeof value === 'object' && value !== null) {
+      if (seen.has(value)) {
+        return; // Remove circular reference
+      }
+      seen.add(value);
+    }
+    return value;
+  };
 }

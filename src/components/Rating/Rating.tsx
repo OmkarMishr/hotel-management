@@ -9,12 +9,14 @@ const Rating: FC<Props> = ({ rating }) => {
   const fullStars = Math.floor(rating);
   const decimalPart = rating - fullStars;
 
-  const fullStarElements = Array(fullStars).fill(<FaStar />);
+  const fullStarElements = Array(fullStars)
+    .fill(null)
+    .map((_, index) => <FaStar key={index} />);
 
   let halfStarElement = null;
 
   if (decimalPart > 0) {
-    halfStarElement = <FaStarHalf />;
+    halfStarElement = <FaStarHalf key="half-star" />;
   }
 
   return (

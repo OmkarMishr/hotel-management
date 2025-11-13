@@ -1,7 +1,7 @@
 import { defineType } from 'sanity';
 
 export default defineType({
-  name: 'verificationToken',
+  name: 'verifyToken',
   title: 'Verification Token',
   type: 'document',
   fields: [

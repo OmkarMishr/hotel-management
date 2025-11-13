@@ -9,7 +9,7 @@ import {
   updateReview,
 } from '@/libs/apis';
 
-export async function GET(req: Request, res: Response) {
+export async function GET() {
   const session = await getServerSession(authOptions);
 
   if (!session) {
@@ -21,19 +21,19 @@ export async function GET(req: Request, res: Response) {
   try {
     const data = await getUserData(userId);
     return NextResponse.json(data, { status: 200, statusText: 'Successful' });
-  } catch (error) {
+  } catch {
     return new NextResponse('Unable to fetch', { status: 400 });
   }
 }
 
-export async function POST(req: Request, res: Response) {
+export async function POST(request: Request) {
   const session = await getServerSession(authOptions);
 
   if (!session) {
     return new NextResponse('Authentication Required', { status: 500 });
   }
 
-  const { roomId, reviewText, ratingValue } = await req.json();
+  const { roomId, reviewText, ratingValue } = await request.json();
 
   if (!roomId || !reviewText || !ratingValue) {
     return new NextResponse('All fields are required', { status: 400 });
@@ -65,8 +65,9 @@ export async function POST(req: Request, res: Response) {
     const cleanData = JSON.parse(JSON.stringify(data, getCircularReplacer()));
 
     return NextResponse.json(cleanData, { status: 200, statusText: 'Successful' });
-  } catch (error: any) {
-    console.log('Error Updating', error);
+  } catch (err: unknown) {
+    // Optionally log error
+    // console.error('Error Updating', err);
     return new NextResponse('Unable to create review', { status: 400 });
   }
 }
@@ -74,7 +75,7 @@ export async function POST(req: Request, res: Response) {
 // Helper function to remove circular references
 function getCircularReplacer() {
   const seen = new WeakSet();
-  return (key: string, value: any) => {
+  return (key: string, value: unknown) => {
     if (typeof value === 'object' && value !== null) {
       if (seen.has(value)) {
         return; // Remove circular reference

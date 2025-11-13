@@ -174,7 +174,7 @@ const RoomDetails = (props: { params: Promise<{ slug: string }> }) => {
               setCheckinDate={setCheckinDate}
               checkoutDate={checkoutDate}
               setCheckoutDate={setCheckoutDate}
-              //@ts-ignore
+              //@ts-expect-error
               calcMinCheckoutDate={calcMinCheckoutDate}
               adults={adults}
               noOfChildren={noOfChildren}

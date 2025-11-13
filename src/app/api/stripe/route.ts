@@ -4,8 +4,6 @@ import { authOptions } from '@/libs/auth';
 import { getServerSession } from 'next-auth';
 import { NextResponse } from 'next/server';
 import { getRoom } from '@/libs/apis';
-import hotelRoom from '../../../../schemas/hotelRoom';
-import user from '../../../../schemas/user';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
   apiVersion: '2024-11-20.acacia',
@@ -20,7 +18,7 @@ type RequestData = {
   hotelRoomSlug: string;
 };
 
-export async function POST(req: Request, res: Response) {
+export async function POST(req: Request): Promise<Response> {
   const {
     checkinDate,
     adults,

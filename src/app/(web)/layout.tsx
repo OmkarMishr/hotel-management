@@ -4,7 +4,6 @@ import Header from "@/components/Header/Header";
 import Footer from "@/components/Footer/Footer";
 import ThemeProvider from "@/components/ThemeProvider/ThemeProvider";
 import "./globals.css";
-import NextAuth from "next-auth";
 import { NextAuthProvider } from "@/components/AuthProvider/AuthProvider";
 import Toast  from "@/components/Toast/Toast";
 

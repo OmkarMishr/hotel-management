@@ -1,17 +1,15 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
-// import { metadata } from '@/app/api/stripe/route';
 
 import { createBooking, updateHotelRoom } from '@/libs/apis';
-import { metadata } from 'next-sanity/studio';
 
-const checkout_session_completed = 'checkout.session.completed';
+const checkoutSessionCompleted = 'checkout.session.completed';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
   apiVersion: '2024-11-20.acacia',
 });
 
-export async function POST(req: Request, res: Response) {
+export async function POST(req: Request) {
   const reqBody = await req.text();
   const sig = req.headers.get('stripe-signature');
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -21,37 +19,47 @@ export async function POST(req: Request, res: Response) {
   try {
     if (!sig || !webhookSecret) return;
     event = stripe.webhooks.constructEvent(reqBody, sig, webhookSecret);
-  } catch (error: any) {
-    return new NextResponse(`Webhook Error: ${error.message}`, { status: 500 });
+  } catch (error) {
+    const err =
+      error instanceof Error
+        ? error
+        : new Error('Unknown error during Stripe webhook parsing');
+    return new NextResponse(`Webhook Error: ${err.message}`, { status: 500 });
   }
 
-  // load our event
   switch (event.type) {
-    case checkout_session_completed:
-      const session = event.data.object;
+    case checkoutSessionCompleted: {
+      // Session and its metadata will be "any", but we can typecast it more safely
+      const session = event.data.object as Stripe.Checkout.Session;
 
+      // Stripe's metadata is always a Record<string, string|undefined>
       const {
-        metadata: {
-          //@ts-ignore
-          adults,
-          //@ts-ignore
-          checkinDate,
-          //@ts-ignore
-          checkoutDate,
-          //@ts-ignore
-          children,
-          //@ts-ignore
-          hotelRoom,
-          //@ts-ignore
-          numberOfDays,
-          //@ts-ignore
-          user,
-          //@ts-ignore
-          discount,
-          //@ts-ignore
-          totalPrice
-        },
-      } = session;
+        adults,
+        checkinDate,
+        checkoutDate,
+        children,
+        hotelRoom,
+        numberOfDays,
+        user,
+        discount,
+        totalPrice,
+      } = (session.metadata ?? {}) as Record<string, string | undefined>;
+
+      if (
+        !adults ||
+        !checkinDate ||
+        !checkoutDate ||
+        !children ||
+        !hotelRoom ||
+        !numberOfDays ||
+        !user ||
+        !discount ||
+        !totalPrice
+      ) {
+        return new NextResponse('Missing metadata in Stripe session', {
+          status: 400,
+        });
+      }
 
       await createBooking({
         adults: Number(adults),
@@ -66,20 +74,20 @@ export async function POST(req: Request, res: Response) {
       });
 
       // Update HotelRoom
-       await updateHotelRoom(hotelRoom);
+      await updateHotelRoom(hotelRoom);
 
       return NextResponse.json('Booking successful', {
         status: 200,
         statusText: 'Booking Successful',
       });
+    }
 
     default:
       console.log(`Unhandled event type ${event.type}`);
   }
 
-  return NextResponse.json('Event Recevied', {
+  return NextResponse.json('Event Received', {
     status: 200,
-    statusText: 'Event Recevied',
+    statusText: 'Event Received',
   });
-
 }

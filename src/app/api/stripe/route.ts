@@ -39,7 +39,6 @@ export async function POST(req: Request): Promise<Response> {
   }
 
   const origin = req.headers.get('origin');
-
   const session = await getServerSession(authOptions);
 
   if (!session) {
@@ -65,7 +64,7 @@ export async function POST(req: Request): Promise<Response> {
             currency: 'usd',
             product_data: {
               name: room.name,
-              images: room.images.map(image => image.url),
+              images: room.images.map((image: { url: string }) => image.url),
             },
             unit_amount: parseInt((totalPrice * 100).toString()),
           },
@@ -82,16 +81,18 @@ export async function POST(req: Request): Promise<Response> {
         numberOfDays,
         user: userId,
         discount: room.discount,
-        totalPrice
-      }
+        totalPrice,
+      },
     });
 
     return NextResponse.json(stripeSession, {
       status: 200,
       statusText: 'Payment session created',
     });
-  } catch (error: any) {
-    console.log('Payment falied', error);
-    return new NextResponse(error, { status: 500 });
+  } catch (error: unknown) {
+    let message = 'Payment failed';
+    if (error instanceof Error) message = error.message;
+    console.log('Payment failed', message);
+    return new NextResponse(message, { status: 500 });
   }
 }

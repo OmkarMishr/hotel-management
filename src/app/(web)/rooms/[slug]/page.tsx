@@ -174,7 +174,7 @@ const RoomDetails = (props: { params: Promise<{ slug: string }> }) => {
               setCheckinDate={setCheckinDate}
               checkoutDate={checkoutDate}
               setCheckoutDate={setCheckoutDate}
-              //@ts-expect-error
+              //@ts-expect-error : If data does not exist, it will be handled earlier
               calcMinCheckoutDate={calcMinCheckoutDate}
               adults={adults}
               noOfChildren={noOfChildren}

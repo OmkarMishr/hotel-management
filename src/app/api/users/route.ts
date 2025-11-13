@@ -65,9 +65,7 @@ export async function POST(request: Request) {
     const cleanData = JSON.parse(JSON.stringify(data, getCircularReplacer()));
 
     return NextResponse.json(cleanData, { status: 200, statusText: 'Successful' });
-  } catch (err: unknown) {
-    // Optionally log error
-    // console.error('Error Updating', err);
+  } catch {
     return new NextResponse('Unable to create review', { status: 400 });
   }
 }
